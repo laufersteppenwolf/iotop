@@ -3,9 +3,17 @@
 # iotop similar program to capture I/O activity per process
 # By laufersteppenwolf
 
+# reset variables just in case...
 var=""
 old="\n"
 new=""
+unit=""
+read_old=0
+write_old=0
+read_new=0
+write_new=0
+old_read=0
+old_write=0
 
 if [[ !( -e /proc/self/io ) ]]; then
 	echo "Your kernel does not support I/O accounting,"
@@ -22,6 +30,34 @@ if [[ !( -e /proc/self/io ) ]]; then
 	echo ""
 	exit 1
 fi
+
+
+while :
+do
+    case $1 in
+        -h | --help)
+             show_help
+             help=1
+             break
+            ;;
+        -m | --mb)
+            unit="mb"
+            shift
+            ;;
+        -b | --bytes)
+            unit="bytes"
+            shift
+            ;;
+        --) # End of all options
+            shift
+            break
+            ;;
+        *)  # no more options. Stop while loop
+            break
+            ;;	
+    esac
+done
+
 
 # get all PIDs
 pid_all=$(ps -A -o pid | sed '/PID/d')  # ubuntu
@@ -100,7 +136,25 @@ write_new_kb=$(bytes2kb $write_new)
 read_new_mb=$(bytes2mb $read_new)
 write_new_mb=$(bytes2mb $write_new)
 
-new="$new $pid	$read_new_kb	$write_new_kb	$read_speed_kb		$write_speed_kb 		$process\n"
+if [[ $unit = "mb" ]]; then
+	read_new_out=$read_new_mb
+	write_new_out=$write_new_mb
+	read_speed_out=$read_speed_mb
+	write_speed_out=$write_speed_mb
+elif [[ $unit = "bytes" ]]; then
+	read_new_out=$read_new
+	write_new_out=$write_new
+	read_speed_out=$read_speed
+	write_speed_out=$write_speed
+else
+	read_new_out=$read_new_kb
+	write_new_out=$write_new_kb
+	read_speed_out=$read_speed_kb
+	write_speed_out=$write_speed_kb
+fi
+
+
+new="$new $pid	$read_new_out	$write_new_out	$read_speed_out		$write_speed_out 		$process\n"
 fi
 fi
 done
