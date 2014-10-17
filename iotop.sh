@@ -43,7 +43,7 @@ old_read=0
 old_write=0
 show_skip=0
 
-if [[ !( -e /proc/self/io ) ]]; then
+if [[ ! -e /proc/self/io ]]; then
     echo "Your kernel does not support I/O accounting,"
     echo "which is required for this tool to work :("
     echo ""
