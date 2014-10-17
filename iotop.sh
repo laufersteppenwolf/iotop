@@ -3,6 +3,31 @@
 # iotop similar program to capture I/O activity per process
 # By laufersteppenwolf
 
+show_help() {
+cat << EOL
+
+Usage: ./iotop.sh [-h -m -b]
+
+Show the I/O usage on per-app/per-process basis.
+READ and WRITTEN show the total amount of bytes read or written
+to the storage per process.
+READ_SPEED and WRITE_SPEED show the current read and write speeds.
+
+Default behavior is to show all units in kb.
+
+    -h   | --help           display this help and exit
+    -m   | --mb             change units to MB
+    -b   | --bytes          change units to bytes
+
+
+Please note that this script is still in an early stage, which is
+why it does not yet support all features iotop for PCs has.
+If you want to contribute, feel free to fork the repo and issue
+a pull request.
+
+EOL
+}
+
 # reset variables just in case...
 var=""
 old="\n"
@@ -38,7 +63,7 @@ do
         -h | --help)
             show_help
             help=1
-            break
+            exit 0
             ;;
         -m | --mb)
             unit="mb"
@@ -90,7 +115,7 @@ for pid in ${pid_all}; do
     fi
 
     if [[ -a /proc/${pid}/io && $process != "" ]]; then
-        get_old "${pid}"
+        get_old ${pid}
         old="$old pid:$pid read:$read_old write:$write_old\n"
         #echo -e $old
     fi
@@ -100,7 +125,7 @@ sleep 1
 
 #echo -e "$old"
 
-for pid in "${pid_all}"; do
+for pid in ${pid_all}; do
     process=""
     if [[ -a /proc/${pid}/cmdline ]]; then
         process="$(cat /proc/${pid}/cmdline)"
@@ -154,11 +179,11 @@ for pid in "${pid_all}"; do
             fi
 
 
-            new="$new $pid	$read_new_out	$write_new_out	$read_speed_out		$write_speed_out 		$process\n"
+            new="$new $pid		$read_new_out		$write_new_out		$read_speed_out			$write_speed_out 			$process\n"
         fi
     fi
 done
 
-echo " PID	READ	WRITTEN	READ_SPEED	WRITE_SPEED	PROCESS"
+echo " PID		READ		WRITTEN		READ_SPEED		WRITE_SPEED		PROCESS"
 echo -e "$new"
 
