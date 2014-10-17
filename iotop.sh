@@ -6,7 +6,7 @@
 show_help() {
 cat << EOL
 
-Usage: ./iotop.sh [-h -m -b]
+Usage: ./iotop.sh [-h -m -b --show_skips]
 
 Show the I/O usage on per-app/per-process basis.
 READ and WRITTEN show the total amount of bytes read or written
@@ -15,9 +15,11 @@ READ_SPEED and WRITE_SPEED show the current read and write speeds.
 
 Default behavior is to show all units in kb.
 
-    -h   | --help           display this help and exit
-    -m   | --mb             change units to MB
-    -b   | --bytes          change units to bytes
+    -h   | --help           Display this help and exit
+    -m   | --mb             Change units to MB
+    -b   | --bytes          Change units to bytes
+    --show_skips            Print a message when skipping a process
+                             with no I/O activity
 
 
 Please note that this script is still in an early stage, which is
@@ -39,6 +41,7 @@ read_new=0
 write_new=0
 old_read=0
 old_write=0
+show_skip=0
 
 if [[ !( -e /proc/self/io ) ]]; then
     echo "Your kernel does not support I/O accounting,"
@@ -71,6 +74,10 @@ do
             ;;
         -b | --bytes)
             unit="bytes"
+            shift
+            ;;
+        --show_skips)
+            show_skip="1"
             shift
             ;;
         --) # End of all options
@@ -135,7 +142,7 @@ for pid in ${pid_all}; do
         get_new "${pid}"
         old_read="$(echo -e ${old} | grep pid:$pid | head -1 | cut -d ' ' -f3 | cut -d ':' -f2)"
         old_write="$(echo -e ${old} | grep pid:$pid | head -1 | cut -d ' ' -f4 | cut -d ':' -f2)"
-        if [[ $read_new = 0 && $write_new = 0 ]]; then
+        if [[ $read_new = 0 && $write_new = 0 && $show_skip = 1 ]]; then
             echo "Skipping process with no IO"
         else
             #echo "$process"
