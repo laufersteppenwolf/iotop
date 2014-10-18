@@ -20,6 +20,7 @@ Default behavior is to show all units in kb.
     -b   | --bytes          Change units to bytes
     --show_skips            Print a message when skipping a process
                              with no I/O activity
+    --only                  Skip processes with no I/O activity
 
 
 Please note that this script is still in an early stage, which is
