@@ -41,6 +41,7 @@ read_new=0
 write_new=0
 old_read=0
 old_write=0
+only=0
 show_skip=0
 
 if [[ ! -e /proc/self/io ]]; then
@@ -76,7 +77,11 @@ do
             unit="bytes"
             shift
             ;;
-        --show_skips)
+        --only)
+            only="1"
+            shift
+            ;;
+        --show_skips | --show-skips)
             show_skip="1"
             shift
             ;;
@@ -142,8 +147,10 @@ for pid in ${pid_all}; do
         get_new "${pid}"
         old_read="$(echo -e ${old} | grep pid:$pid | head -1 | cut -d ' ' -f3 | cut -d ':' -f2)"
         old_write="$(echo -e ${old} | grep pid:$pid | head -1 | cut -d ' ' -f4 | cut -d ':' -f2)"
-        if [[ $read_new = 0 && $write_new = 0 && $show_skip = 1 ]]; then
-            echo "Skipping process with no IO"
+        if [[ $read_new = 0 && $write_new = 0 && $only = 1 ]]; then
+            if [[ $show_skip = 1 ]]; then
+                echo "Skipping process with no IO"
+            fi
         else
             #echo "$process"
             #echo "old read: $old_read"
