@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/system/bin/sh
 #
 # iotop similar program to capture I/O activity per process
-# By laufersteppenwolf
+# By laufersteppenwolf@xda
 
 show_help() {
 cat << EOL
@@ -97,8 +97,8 @@ done
 
 
 # get all PIDs
-pid_all="$(ps -A -o pid | sed '/PID/d')"  # ubuntu
-#pid_all=$(ps | awk '{ print $2}' | sed '/PID/d')  # android
+#pid_all="$(ps -A -o pid | sed '/PID/d')"  # ubuntu
+pid_all=$(ps | awk '{ print $2}' | sed '/PID/d')  # android
 
 bytes2kb() {
     local var="$(expr $1 '/' 1024)"
